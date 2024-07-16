@@ -6,12 +6,11 @@ import androidx.activity.compose.setContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -24,9 +23,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import br.com.darlison.alcoolOuGasolina.ui.theme.AlcoolOuGasolinaTheme
 
 class MainActivity : ComponentActivity() {
@@ -34,12 +36,11 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             AlcoolOuGasolinaTheme {
-                // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                   App()
+                    App()
                 }
             }
         }
@@ -48,35 +49,38 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun App() {
-    var valGasolina = remember {
-        mutableStateOf("")
+    val navController = rememberNavController()
+    NavHost(navController = navController, startDestination = "main") {
+        composable("main") { MainScreen(navController) }
+        composable("benefits") { BenefitsScreen(navController) }
     }
+}
 
-    var valorAlcool = remember {
-        mutableStateOf("")
-    }
-
+@Composable
+fun MainScreen(navController: NavHostController) {
+    var valGasolina = remember { mutableStateOf("") }
+    var valorAlcool = remember { mutableStateOf("") }
 
     Column(
         Modifier
             .background(color = Color(0xFF00BCD4))
             .fillMaxSize(),
-
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = "Álcool ou Gasolina?",
-                style = TextStyle(
-                    color = Color.White,
-                    fontSize = 32.sp,
-                    fontWeight = FontWeight.Bold
-                )
+        Text(
+            text = "Álcool ou Gasolina?",
+            style = TextStyle(
+                color = Color.White,
+                fontSize = 32.sp,
+                fontWeight = FontWeight.Bold
+            )
         )
 
         Spacer(modifier = Modifier.size(16.dp))
 
         AnimatedVisibility(visible = valGasolina.value.isNotBlank() && valorAlcool.value.isNotBlank()) {
-            if (valGasolina.value.isNotBlank() && valorAlcool.value.isNotBlank()){
+            if (valGasolina.value.isNotBlank() && valorAlcool.value.isNotBlank()) {
                 val valorAlcoolDouble = valorAlcool.value.toDouble()
                 val valGasolinaDouble = valGasolina.value.toDouble()
 
@@ -92,43 +96,77 @@ fun App() {
                 } else {
                     Color.Green
                 }
-                Text(text = alcoolOuGasolina, style = TextStyle(color = cor, fontSize = 40.sp, fontWeight = FontWeight.Bold))
+                Text(
+                    text = alcoolOuGasolina,
+                    style = TextStyle(color = cor, fontSize = 40.sp, fontWeight = FontWeight.Bold)
+                )
             }
-
         }
 
-
-
+        Spacer(modifier = Modifier.size(16.dp))
 
         TextField(
             value = valorAlcool.value,
-            onValueChange = {novoValor ->
-                             valorAlcool.value = novoValor
+            onValueChange = { novoValor ->
+                valorAlcool.value = novoValor
             },
-            label = {
-                Text(text = "Álcool")
-            }
+            label = { Text(text = "Álcool") }
         )
 
         Spacer(modifier = Modifier.size(16.dp))
 
-
-//        var valGasolina = remember {
-//            mutableStateOf("")
-//        }
-
         TextField(
             value = valGasolina.value,
-            onValueChange = {novoValor ->
-                           valGasolina.value = novoValor
+            onValueChange = { novoValor ->
+                valGasolina.value = novoValor
             },
-            label = {
-                Text(text = "Gasolina")
-            }
+            label = { Text(text = "Gasolina") }
         )
-    }
 
+        Spacer(modifier = Modifier.size(16.dp))
+
+        Button(onClick = { navController.navigate("benefits") }) {
+            Text("Ver Benefícios")
+        }
+    }
 }
 
+@Composable
+fun BenefitsScreen(navController: NavHostController) {
+    Column(
+        Modifier
+            .background(color = Color(0xFF00BCD4))
+            .fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "Benefícios do Álcool e da Gasolina",
+            style = TextStyle(
+                color = Color.White,
+                fontSize = 32.sp,
+                fontWeight = FontWeight.Bold
+            )
+        )
 
+        Spacer(modifier = Modifier.size(16.dp))
 
+        Text(
+            text = "Álcool: \n- Menos poluente\n- Menor custo\n",
+            style = TextStyle(color = Color.Green, fontSize = 20.sp)
+        )
+
+        Spacer(modifier = Modifier.size(16.dp))
+
+        Text(
+            text = "Gasolina: \n- Maior autonomia\n- Fácil acesso\n",
+            style = TextStyle(color = Color.Red, fontSize = 20.sp)
+        )
+
+        Spacer(modifier = Modifier.size(16.dp))
+
+        Button(onClick = { navController.popBackStack() }) {
+            Text("Voltar")
+        }
+    }
+}
